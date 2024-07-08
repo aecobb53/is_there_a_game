@@ -1,0 +1,36 @@
+version: '3'
+
+services:
+    db:
+        # image: postgres:13
+        image: postgis/postgis
+        environment:
+            POSTGRES_USER: example
+            POSTGRES_PASSWORD: example
+            POSTGRES_DB: example_db
+        ports:
+            - "5432:5432"
+        # volumes:
+        #     - postgres_data:/var/lib/postgresql/data
+
+    app:
+        build: .
+        depends_on:
+            - db
+        environment:
+            DATABASE_URL: postgresql://example:example@db:5432/example_db
+            LOGICAL_ENV: ${LOGICAL_ENV}
+            SERVICE_URL: ${IS_THERE_A_FUCKING_GAME_SERVICE_URL}
+            PYTHONUNBUFFERED: 1
+        command: bash entrypoint.sh
+        volumes:
+            - .:/app
+        ports:
+            - 8204:8000
+        links:
+            - db
+        # image: game_process_calculator
+        # container_name: game_process_calculator
+
+# volumes:
+#   postgres_data:
