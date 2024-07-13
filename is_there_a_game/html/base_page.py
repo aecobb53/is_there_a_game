@@ -18,26 +18,30 @@ def project_base_page():
     """).add_style({'margin': '20px'}))
     page_content.add_element(welcome_div)
 
-    # # Table of Contents
-    # toc_div = Div(id='toc-div')
+    # Table of Contents
+    toc_div = Div(id='toc-div')
 
-    # # Projects
-    # toc_div.add_element(Header(level=2, internal=f"Projects").add_style({'margin': '20px'}))
-    # toc_projects_url_list = HtmlList(ordered=False).add_style({'margin': '20px', 'background-color': 'white'})
-    # toc_projects_url_list.add_element(
-    #     HtmlListItem(Link(internal='Create, Update, or Delete Project', href=f'{service_url}/html/project/modify')))
-    # toc_projects_url_list.add_element(
-    #     HtmlListItem(Link(internal='Projects List', href=f'{service_url}/html/project')))
-    # toc_div.add_element(toc_projects_url_list)
+    # Events
+    toc_div.add_element(Header(level=2, internal=f"Events").add_style({'margin': '20px'}))
+    toc_projects_url_list = HtmlList(ordered=False).add_style({'margin': '20px', 'background-color': 'white'})
+    toc_projects_url_list.add_element(
+        HtmlListItem(Link(internal='Events Today', href=f'{service_url}/is-there-a-fucking-game/today')))
+    toc_projects_url_list.add_element(
+        HtmlListItem(Link(internal='Events in the next 3 days', href=f'{service_url}/is-there-a-fucking-game/in-the-next-3-days')))
+    toc_projects_url_list.add_element(
+        HtmlListItem(Link(internal='Events This Month', href=f'{service_url}/is-there-a-fucking-game/this-month')))
+    toc_projects_url_list.add_element(
+        HtmlListItem(Link(internal='All Events', href=f'{service_url}/is-there-a-fucking-game/')))
+    toc_div.add_element(toc_projects_url_list)
 
-    # # Resources
-    # toc_div.add_element(Header(level=2, internal=f"Resources").add_style({'margin': '20px'}))
-    # toc_resources_url_list = HtmlList(ordered=False).add_style({'margin': '20px', 'background-color': 'white'})
-    # toc_resources_url_list.add_element(
-    #     HtmlListItem(Link(internal='Create, Update, or Delete Resource', href=f'{service_url}/html/resource/modify')))
+    # Venues
+    toc_div.add_element(Header(level=2, internal=f"Venues").add_style({'margin': '20px'}))
+    toc_resources_url_list = HtmlList(ordered=False).add_style({'margin': '20px', 'background-color': 'white'})
+    toc_resources_url_list.add_element(
+        HtmlListItem(Link(internal='Venues', href=f'{service_url}/html/venues')))
     # toc_resources_url_list.add_element(
     #     HtmlListItem(Link(internal='Resources List', href=f'{service_url}/html/resource')))
-    # toc_div.add_element(toc_resources_url_list)
+    toc_div.add_element(toc_resources_url_list)
 
     # # Processes
     # toc_div.add_element(Header(level=2, internal=f"Processes").add_style({'margin': '20px'}))
@@ -57,7 +61,7 @@ def project_base_page():
     #     HtmlListItem(Link(internal='Workflows List', href=f'{service_url}/html/workflow')))
     # toc_div.add_element(toc_workflows_url_list)
 
-    # page_content.add_element(toc_div)
+    page_content.add_element(toc_div)
 
     navigation_content = NavigationContent(webpage_name="Is There A Fucking Game?")
     body_content = BodyContent(body_content=[page_content])

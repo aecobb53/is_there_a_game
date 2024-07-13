@@ -34,16 +34,18 @@ clean_router = APIRouter(
 )
 
 
-@router.get('/')
-@explicit_router.get('/')
-@clean_router.get('/')
+path = '/'
+@router.get(path)
+@explicit_router.get(path)
+@clean_router.get(path)
 async def html_event(request: Request):
     event_page = filter_events_html_page()
     return HTMLResponse(content=event_page, status_code=200)
 
-@router.get('/today')
-@explicit_router.get('/today')
-@clean_router.get('/today')
+path = '/today'
+@router.get(path)
+@explicit_router.get(path)
+@clean_router.get(path)
 async def html_events_today(request: Request):
     now = datetime.now()
     morning = datetime(now.year, now.month, now.day)
@@ -54,9 +56,10 @@ async def html_events_today(request: Request):
     )
     return HTMLResponse(content=event_page, status_code=200)
 
-@router.get('/this-month')
-@explicit_router.get('/this-month')
-@clean_router.get('/this-month')
+path = '/this-month'
+@router.get(path)
+@explicit_router.get(path)
+@clean_router.get(path)
 async def html_events_today(request: Request):
     now = datetime.now()
     first_day = datetime(now.year, now.month, 1)
@@ -67,13 +70,14 @@ async def html_events_today(request: Request):
     )
     return HTMLResponse(content=event_page, status_code=200)
 
-@router.get('/in-the-next-{day_number}-days')
-@explicit_router.get('/in-the-next-{day_number}-days')
-@clean_router.get('/in-the-next-{day_number}-days')
-async def html_events_today(day_number: int, request: Request):
+path = '/in-the-next-{number_of_days}-days'
+@router.get(path)
+@explicit_router.get(path)
+@clean_router.get(path)
+async def html_events_today(number_of_days: int, request: Request):
     now = datetime.now()
     first_day = datetime(now.year, now.month, now.day)
-    last_day = first_day + timedelta(days=day_number)
+    last_day = first_day + timedelta(days=number_of_days)
     event_page = filter_events_html_page(
         datetime_start=first_day,
         datetime_end=last_day

@@ -16,29 +16,13 @@ from models import (
     ContextSingleton)
 from handlers import DatabaseHandler, init_logger
 from html import project_base_page, unimplemented_page
-
-
-# from models import RestHeaders, ResponseTypes
-# from models import WorkflowFilter, BalanceWorkflowArgs
-# from handlers import DatabaseHandler, CalculationHandler
-# from app_files import ContextSingleton, init_logger
-# from html import (project_base_page)
-# from utils import parse_query_params
-
-# from my_base_html_lib import MyBaseDocument, NavigationContent, SidebarContent, BodyContent, FooterContent
-# from phtml import Header, Style
-
-# from routs import (project_router,
-#     tag_router,
-#     resource_router,
-#     process_router,
-#     workflow_router,
-#     project_html_router,
-#     resource_html_router,
-#     process_html_router,
-#     workflow_html_router,
-#     html_calculator_router,)
-from routs import event_router, event_html_router, explicit_html_router, clean_html_router
+from routs import (event_router,
+    venue_router,
+    event_html_router,
+    explicit_html_router,
+    clean_html_router,
+    venue_html_router
+)
 
 # Service Info
 with open(os.path.join(os.path.dirname(os.getcwd()), 'info.json'), 'r') as jf:
@@ -61,9 +45,12 @@ app.add_middleware(
 )
 
 app.include_router(event_router)
+app.include_router(venue_router)
 app.include_router(event_html_router)
 app.include_router(explicit_html_router)
 app.include_router(clean_html_router)
+app.include_router(venue_html_router)
+
 
 
 @app.on_event("startup")
