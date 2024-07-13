@@ -28,6 +28,11 @@ class ExpectedImpact(Enum):
     HIGH = 'HIGH'
 
 
+class ExternalUrls(BaseModel):
+    event_page: str
+    other: Dict[str, str] | None = None
+
+
 class Event(BaseModel):
     uid: str
     creation_datetime: datetime
@@ -36,19 +41,17 @@ class Event(BaseModel):
     active: bool = True
     name: str
     venue: str
-    location: PointModel | PolygonModel | MultiPolygonModel
+    geometry: PointModel | PolygonModel | MultiPolygonModel
     closures_start: datetime | str
     closures_end: datetime | str
     event_start: datetime | str
     event_end: datetime | str
     expected_impact: ExpectedImpact
     source: str
-    external_urls: Dict[str, str] | None = None
+    external_urls: ExternalUrls | None = None
 
     @model_validator(mode='before')
     def validate_fields(cls, fields):
-        # print('fields')
-        # print(fields)
         utils = Utils()
         if fields.get('uid') is None:
             fields['uid'] = str(uuid4())
@@ -57,11 +60,9 @@ class Event(BaseModel):
 
         if fields.get('event_start') is not None:
             event_start = utils.time_str_to_obj(time_str=fields['event_start'], allow_none=False)
-            # print(f"EVENT START: [{event_start}]")
             fields['event_start'] = event_start
         if fields.get('event_end') is not None:
             event_end = utils.time_str_to_obj(time_str=fields['event_end'], allow_none=False)
-            # print(f"EVENT END: [{event_end}]")
             fields['event_end'] = event_end
 
         if 'closures_start' not in fields:
@@ -72,8 +73,6 @@ class Event(BaseModel):
             fields['closures_end'] = event_end
         else:
             fields['closures_end'] = utils.time_str_to_obj(time_str=fields['closures_end'], allow_none=True)
-        # print('fields')
-        # print(fields)
         return fields
 
 
@@ -86,7 +85,7 @@ class EventDBBase(SQLModel):
     active: bool
     name: str
     venue: str
-    location: Any = Field(sa_column=Column(Geometry('GEOMETRY'))) # Here POINT is used but could be other geometries as well
+    geometry: Any = Field(sa_column=Column(Geometry('GEOMETRY'))) # Here POINT is used but could be other geometries as well
     closures_start: datetime
     closures_end: datetime
     event_start: datetime
@@ -98,14 +97,14 @@ class EventDBBase(SQLModel):
     def cast_data_object(self, data_object_class) -> Event:
         """Return a data object based on the data_object_class"""
         content = self.model_dump()
-        poly = to_shape(content['location'])
+        poly = to_shape(content['geometry'])
         if isinstance(poly, Point):
-            location = PointModel(**json.loads(to_geojson(poly)))
+            geometry = PointModel(**json.loads(to_geojson(poly)))
         elif isinstance(poly, Polygon):
-            location = PolygonModel(**json.loads(to_geojson(poly)))
+            geometry = PolygonModel(**json.loads(to_geojson(poly)))
         elif isinstance(poly, MultiPolygon):
-            location = MultiPolygonModel(**json.loads(to_geojson(poly)))
-        content['location'] = location
+            geometry = MultiPolygonModel(**json.loads(to_geojson(poly)))
+        content['geometry'] = geometry
         data_obj = data_object_class(**content)
         return data_obj
 
@@ -113,11 +112,11 @@ class EventDBBase(SQLModel):
 class EventDBCreate(EventDBBase):
     @model_validator(mode='before')
     def validate_fields(cls, fields):
-        polygon = fields.location
+        polygon = fields.geometry
         geojson_str = polygon.model_dump_json()
         # wkt = from_geojson(geojson_str)
         fields = json.loads(fields.model_dump_json())
-        fields['location'] = geojson_str
+        fields['geometry'] = geojson_str
         if 'id' in fields:
             del fields['id']
         return fields
@@ -135,8 +134,8 @@ class EventFilter(BaseModel):
     uid: List[str] | None = None
     name: List[str] | None = None
     venue: List[str] | None = None
-    # location: List[Point | Polygon] | None = None
-    location: PointModel | PolygonModel | MultiPolygonModel | None = None
+    # geometry: List[Point | Polygon] | None = None
+    geometry: PointModel | PolygonModel | MultiPolygonModel | None = None
     active: bool | str | None = True
     # closures_start: datetime
     # closures_end: datetime
@@ -167,11 +166,11 @@ class EventFilter(BaseModel):
             fields['creation_datetime_before'] = fields['creation_datetime_before'][0]
         if isinstance(fields.get('active'), list):
             fields['active'] = fields['active'][0]
-        if isinstance(fields.get('location'), list):
-            location = fields['location'][0]
-            location = shapely.wkt.loads(location)
-            location = PolygonModel(**json.loads(to_geojson(location)))
-            fields['location'] = location
+        if isinstance(fields.get('geometry'), list):
+            geometry = fields['geometry'][0]
+            geometry = shapely.wkt.loads(geometry)
+            geometry = PolygonModel(**json.loads(to_geojson(geometry)))
+            fields['geometry'] = geometry
         if isinstance(fields.get('limit'), list):
             fields['limit'] = fields['limit'][0]
         if isinstance(fields.get('offset'), list):
@@ -191,10 +190,10 @@ class EventFilter(BaseModel):
             query = query.filter(database_object_class.venue.in_(self.venue))
         if self.source:
             query = query.filter(database_object_class.source.in_(self.source))
-        if self.location:
-            location = from_geojson(self.location.model_dump_json())
+        if self.geometry:
+            geometry = from_geojson(self.geometry.model_dump_json())
             query = query.filter(
-                func.ST_Intersects(database_object_class.location, from_shape(location))
+                func.ST_Intersects(database_object_class.geometry, from_shape(geometry))
             )
 
         if self.event_after:

@@ -21,10 +21,10 @@ class EventHandler(BaseHandler):
             create_obj = EventDBCreate.model_validate(event)
             create_obj = EventDB.model_validate(create_obj)
             json_content = json.loads(create_obj.model_dump_json())
-            location = json_content['location']
-            poly = from_geojson(location)
-            location = from_shape(poly)
-            create_obj.location = location
+            geometry = json_content['geometry']
+            poly = from_geojson(geometry)
+            geometry = from_shape(poly)
+            create_obj.geometry = geometry
             session.add(create_obj)
             session.commit()
             session.refresh(create_obj)
@@ -83,7 +83,7 @@ class EventHandler(BaseHandler):
 
             # Make changes
             skip_fields = [
-                'location',
+                'geometry',
             ]
             for key in Event.__fields__.keys():
                 if key not in skip_fields:

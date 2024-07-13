@@ -10,9 +10,10 @@ from shapely import Point, Polygon, MultiPolygon, to_geojson, from_geojson
 
 source = 'populate empower field script'
 base_url = 'http://localhost:8204/'
+# base_url = 'http://hamster.nax.lol:8204/'
 web_url = 'https://www.empowerfieldatmilehigh.com/events'
 venue = 'Empower Field at Mile High'
-location = Point(-105.02005494353804, 39.74383936528997)
+geometry = Point(-105.02005494353804, 39.74383936528997)
 
 # driver = webdriver.Firefox()
 # driver.get(web_url)
@@ -27,8 +28,20 @@ soup = BeautifulSoup(page.content, "html.parser")
 #     fl.write(html)
 
 event_tags = soup.find_all("div", {"class": "info clearfix"})
-let = len(event_tags)
+# let = len(event_tags)
 
+# Venue
+x=1
+venue_payload = {
+    'name': venue,
+    'geometry': json.loads(to_geojson(geometry)),
+    'source': source,
+    'external_urls': {'event_page': web_url}
+}
+resp = requests.post(f'{base_url}/venues', json=venue_payload)
+x=1
+
+# Events
 for event_tag in event_tags:
     date = event_tag.find("div", {"class": "date"})
     date_spans = date.find_all('span')
@@ -115,14 +128,14 @@ for event_tag in event_tags:
     event = {
         'name': name,
         'venue': venue,
-        'location': json.loads(to_geojson(location)),
+        'geometry': json.loads(to_geojson(geometry)),
         'closures_start': datetime.strftime(closures_start, '%Y-%m-%dT%H:%M'),
         'closures_end': datetime.strftime(closures_end, '%Y-%m-%dT%H:%M'),
         'event_start': datetime.strftime(event_start, '%Y-%m-%dT%H:%M'),
         'event_end': datetime.strftime(event_end, '%Y-%m-%dT%H:%M'),
         'expected_impact': 'HIGH',
         'source': source,
-        'external_urls': {'Event Page': event_url}
+        'external_urls': {'event_page': event_url}
     }
     x=1
 
@@ -147,7 +160,10 @@ for event_tag in event_tags:
     else:
         resp = requests.post(base_url + '/event', json=event)
     print(resp)
-    content = resp.json()
-    print(content)
+    if not resp.ok:
+        content = resp.json()
+        print(content)
+        break
+    x=1
 
 x=1

@@ -106,7 +106,7 @@ async function populateTable() {
 
         // Events Location
         var event_hyperlink = document.createElement("a");
-        event_hyperlink.href = service_url + '/html/location/' + events_array[i].uid;
+        event_hyperlink.href = service_url + '/html/venue/' + events_array[i].uid;
         event_hyperlink.innerHTML = events_array[i].venue;
 
         var events_table_item = document.createElement('td');
