@@ -4,6 +4,7 @@ services:
     db:
         # image: postgres:13
         image: postgis/postgis
+        container_name: IsThereAGameDB
         environment:
             POSTGRES_USER: example
             POSTGRES_PASSWORD: example
@@ -15,6 +16,8 @@ services:
 
     app:
         build: .
+        # container_name: IsThereAGame
+        image: is_there_a_game:latest
         depends_on:
             - db
         environment:
@@ -22,15 +25,22 @@ services:
             LOGICAL_ENV: ${LOGICAL_ENV}
             SERVICE_URL: ${IS_THERE_A_FUCKING_GAME_SERVICE_URL}
             PYTHONUNBUFFERED: 1
-        command: bash entrypoint.sh
-        volumes:
-            - .:/app
-        ports:
-            - 8204:8000
+        # command: bash entrypoint.sh
+        # volumes:
+        #     - .:/app
+        # ports:
+        #     - 8204:8000
         links:
             - db
-        # image: game_process_calculator
-        # container_name: game_process_calculator
+
+        # labels:
+        #     - "traefik.enable=true"
+        #     - "traefik.http.routers.is-there-a-game_lan.entrypoints=web"
+        #     - "traefik.http.routers.is-there-a-game_lan.rule=Host(`is-there-a-game.bragi.lan`)"
+        #     - "traefik.http.routers.is-there-a-game.rule=Host(`is-there-a-game.nax.lol`)"
+        #     - "traefik.http.routers.is-there-a-game.entrypoints=web"
+        #     - "traefik.http.services.is-there-a-game.loadbalancer.server.port=8000"
+        #     # - "traefik.http.routers.dashy_local.tls=true"
 
 volumes:
   postgres_data:
